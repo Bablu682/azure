@@ -41,6 +41,9 @@ import com.microsoft.azure.storage.StorageException;
 @EnableEurekaClient
 @EnableDiscoveryClient
 @EnableAutoConfiguration
+@EnableHystrix
+@EnableHystrixDashboard
+@EnableCircuitBreaker
 public class PLMBommsApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(PLMBommsApplication.class);
@@ -120,6 +123,20 @@ public class PLMBommsApplication {
 	public String bomGet() {
 		LOG.info("in plm-bom-ms get method");
 		return "return response from plm-bom-ms get method";
+	}
+	@RequestMapping("/fallback1")
+	@HystrixCommand(fallbackMethod = "error")
+	public String bomHystrix() {
+		URI uri = URI.create("http://localhost:8090/recommended");//  invalid url and mapping 
+																	
+		return this.resttamplate.getForObject(uri, String.class);
+	}
+
+// error() call when bomHystrix() method is fallback
+	public String error() {
+		
+		return "Fallback method will be call ";
+	
 	}
 
 	public static void main(String[] args) {
